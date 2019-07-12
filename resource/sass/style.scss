@@ -1,0 +1,49 @@
+@charset "utf-8";
+@import "reset";
+
+@function get_percent($size, $viewport: 375) {
+  $rate: 100 / $viewport;
+  @return $rate * $size * 1%;
+}
+
+@function get_vw($size, $viewport: 375) {
+  $rate: 100 / $viewport;
+  @return $rate * $size * 1vw;
+}
+
+@mixin clearfix() {
+  &:before,
+  &:after {
+    content: "";
+    display: table;
+  }
+  &:after {
+    clear: both;
+  }
+}
+.main {
+  width: 100%;
+  margin: 0 auto;
+  padding-top: 40px;
+}
+
+.images {
+  width: 100%;
+  img {
+    vertical-align: bottom;
+    width: 100%;
+  }
+  .images-wrap {
+    margin: 0 auto;
+    width: get_percent(690/2);
+    overflow: hidden;
+    -webkit-overflow-scrolling: touch;
+    .images-list {
+      width: 300%;
+      display: flex;
+      justify-content: flex-start;
+      // transition: 0.2s all ease-out;
+      -webkit-overflow-scrolling: touch;
+    }
+  }
+}

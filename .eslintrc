@@ -1,0 +1,28 @@
+{
+  "env": {
+    "es6": true,
+    "browser": true
+  },
+  "extends": ["eslint:recommended", "plugin:prettier/recommended"],
+  "rules": {
+    "prettier/prettier": [
+      "error",
+      {
+        "singleQuote": true,
+        "trailingComma": "es5",
+        "printWidth": 80,
+        "editor.formatOnSave": true,
+        "proseWrap": "always",
+        "tabWidth": 2,
+        "requireConfig": false,
+        "useTabs": false,
+        "bracketSpacing": true,
+        "jsxBracketSameLine": false,
+        "semi": true
+      }
+    ]
+  },
+  "parserOptions": {
+    "sourceType": "module"
+  }
+}
