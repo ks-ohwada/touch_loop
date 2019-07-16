@@ -1,3 +1,5 @@
+import velocity from 'velocity-animate';
+
 export default class CarouselUI {
   constructor() {
     // DOM
@@ -13,6 +15,8 @@ export default class CarouselUI {
     this.lastX = 0;
     this.diffX = 0;
     this.translateX = 0;
+    this.lastTranslateX = 0;
+
     this.index = 0;
 
     //フラグ
@@ -55,6 +59,7 @@ export default class CarouselUI {
     this.$carouselInner.addEventListener('touchend', e => {
       this.lastX = e.changedTouches[0].pageX;
 
+      // 指を離した場所が最後のスライドだった場合、右方向に無限ループでスライドさせる。
       if (this.isLastSlide) {
         this.translateX = 0;
         this.index = 0;
@@ -63,6 +68,7 @@ export default class CarouselUI {
         return;
       }
 
+      // 指を離した場所が最初のスライドだった場合、左方向に無限ループでスライドさせる。
       if (this.isFirstSlide) {
         this.translateX = this.width * (this.$carouselItems.length - 1);
         this.index = this.$carouselItems.length - 1;
@@ -89,6 +95,7 @@ export default class CarouselUI {
 
   // 指でカルーセルを動かしている最中の処理
   moveHandler() {
+    // スライドを動かしている最中、一番最後か一番最初のスライドだった場合無限ループさせる。
     if (this.isLastSlide || this.isFirstSlide) {
       this.loopCarousel();
       return;
@@ -98,11 +105,15 @@ export default class CarouselUI {
       this.$carouselInner.style.transform = `translateX(-${this.translateX +
         this.firstX -
         this.diffX}px)`;
+
+      this.lastTranslateX = this.translateX + this.firstX - this.diffX;
     }
 
     if (this.diffX > this.firstX) {
       this.$carouselInner.style.transform = `translateX(${this.diffX -
         (this.translateX + this.firstX)}px)`;
+
+      this.lastTranslateX = -(this.diffX - (this.translateX + this.firstX));
     }
 
     this.$carouselItems[this.$carouselItems.length - 1].style.transform = ``;
@@ -112,16 +123,66 @@ export default class CarouselUI {
   resizeCarouselWidth() {
     this.width = Number(this.$carouselWrap.clientWidth);
     this.translateX = this.width * this.index;
-    this.slideCarousel();
+    this.$carouselInner.style.transform = `translateX(-${this.translateX}px)`;
   }
 
   // カルーセルをスライドさせる
   slideCarousel() {
-    this.$carouselInner.style.transform = `translateX(-${this.translateX}px)`;
-
-    if (this.isFirstSlide || this.isLastSlide) {
-      this.$carouselItems[this.$carouselItems.length - 1].style.transform = ``;
+    if (this.isLastSlide) {
+      velocity(
+        this.$carouselInner,
+        {
+          translateX: [0, this.lastTranslateX],
+        },
+        {
+          duration: 500,
+          mobileHA: false,
+          complete: () => {
+            this.$carouselItems[
+              this.$carouselItems.length - 1
+            ].style.transform = ``;
+          },
+        }
+      );
+      return;
     }
+
+    if (this.isFirstSlide) {
+      velocity(
+        this.$carouselInner,
+        {
+          translateX: [this.width, -this.lastTranslateX],
+        },
+        {
+          duration: 300,
+          mobileHA: false,
+          complete: () => {
+            this.$carouselInner.style.transform = `translateX(-${this.width *
+              (this.$carouselItems.length - 1)}px)`;
+            this.$carouselItems[
+              this.$carouselItems.length - 1
+            ].style.transform = ``;
+          },
+        }
+      );
+      return;
+    }
+
+    velocity(
+      this.$carouselInner,
+      {
+        translateX: [-this.translateX, -this.lastTranslateX],
+      },
+      {
+        duration: 300,
+        mobileHA: false,
+        complete: () => {
+          this.$carouselItems[
+            this.$carouselItems.length - 1
+          ].style.transform = ``;
+        },
+      }
+    );
   }
 
   // カルーセルがループする時の処理
@@ -132,6 +193,8 @@ export default class CarouselUI {
       ].style.transform = `translateX(-${this.$carouselItems.length * 100}%)`;
       this.$carouselInner.style.transform = `translateX(${this.width -
         (this.firstX - this.diffX)}px)`;
+
+      this.lastTranslateX = this.width - (this.firstX - this.diffX);
     }
 
     if (this.isFirstSlide) {
@@ -140,6 +203,8 @@ export default class CarouselUI {
       ].style.transform = `translateX(-${this.$carouselItems.length * 100}%)`;
       this.$carouselInner.style.transform = `translateX(${this.diffX -
         (this.translateX + this.firstX)}px)`;
+
+      this.lastTranslateX = -(this.diffX - (this.translateX + this.firstX));
     }
   }
 }
