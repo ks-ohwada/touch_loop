@@ -22,6 +22,8 @@ export default class CarouselUI {
     //フラグ
     this.isLastSlide = false;
     this.isFirstSlide = false;
+    this.isUndo = false;
+    this.isTouched = false;
 
     // 初期化
     this.$carouselInner.style.width = `${this.$carouselItems.length * 100}%`;
@@ -36,13 +38,19 @@ export default class CarouselUI {
       this.resizeCarouselWidth();
     });
 
+    // タッチ開始
     this.$carouselInner.addEventListener('touchstart', e => {
+      e.preventDefault();
       this.firstX = e.changedTouches[0].pageX;
     });
 
+    // タッチ中
     this.$carouselInner.addEventListener('touchmove', e => {
-      e.preventDefault();
       this.diffX = e.changedTouches[0].pageX;
+
+      if (this.firstX === this.lastX || this.isTouched) {
+        return;
+      }
 
       this.width * (this.$carouselItems.length - 1) <
       this.translateX + this.firstX - this.diffX
@@ -56,8 +64,36 @@ export default class CarouselUI {
       this.moveHandler();
     });
 
+    // タッチ終了
     this.$carouselInner.addEventListener('touchend', e => {
+      e.preventDefault();
       this.lastX = e.changedTouches[0].pageX;
+
+      // スライド中はクリックイベントを発火しない
+      if (this.firstX === this.lastX || this.isTouched) {
+        return;
+      }
+
+      this.isTouched = true;
+
+      // 一番最後のスライドかつ、スライド量が50px以下の場合、スライドさせない
+      if (
+        0 < this.firstX - this.lastX &&
+        this.firstX - this.lastX < 50 &&
+        this.isLastSlide
+      ) {
+        this.isUndo = true;
+        this.isLastSlide = false;
+        this.slideCarousel();
+        return;
+      }
+
+      // 一番最初のスライドかつ、スライド量が50px以下の場合、スライドさせない
+      if (0 < this.lastX - this.firstX && this.lastX - this.firstX < 50) {
+        this.isFirstSlide = false;
+        this.slideCarousel();
+        return;
+      }
 
       // 指を離した場所が最後のスライドだった場合、右方向に無限ループでスライドさせる。
       if (this.isLastSlide) {
@@ -128,6 +164,29 @@ export default class CarouselUI {
 
   // カルーセルをスライドさせる
   slideCarousel() {
+    if (this.isUndo) {
+      velocity(
+        this.$carouselInner,
+        {
+          translateX: [this.width, this.lastTranslateX],
+        },
+        {
+          duration: 500,
+          mobileHA: false,
+          complete: () => {
+            this.$carouselInner.style.transform = `translateX(-${this.width *
+              (this.$carouselItems.length - 1)}px)`;
+            this.$carouselItems[
+              this.$carouselItems.length - 1
+            ].style.transform = ``;
+            this.isTouched = false;
+            this.isUndo = false;
+          },
+        }
+      );
+      return;
+    }
+
     if (this.isLastSlide) {
       velocity(
         this.$carouselInner,
@@ -141,6 +200,7 @@ export default class CarouselUI {
             this.$carouselItems[
               this.$carouselItems.length - 1
             ].style.transform = ``;
+            this.isTouched = false;
           },
         }
       );
@@ -154,7 +214,7 @@ export default class CarouselUI {
           translateX: [this.width, -this.lastTranslateX],
         },
         {
-          duration: 300,
+          duration: 500,
           mobileHA: false,
           complete: () => {
             this.$carouselInner.style.transform = `translateX(-${this.width *
@@ -162,6 +222,7 @@ export default class CarouselUI {
             this.$carouselItems[
               this.$carouselItems.length - 1
             ].style.transform = ``;
+            this.isTouched = false;
           },
         }
       );
@@ -174,12 +235,13 @@ export default class CarouselUI {
         translateX: [-this.translateX, -this.lastTranslateX],
       },
       {
-        duration: 300,
+        duration: 500,
         mobileHA: false,
         complete: () => {
           this.$carouselItems[
             this.$carouselItems.length - 1
           ].style.transform = ``;
+          this.isTouched = false;
         },
       }
     );
