@@ -73,7 +73,6 @@ export default class CarouselUI {
       if (this.firstX === this.lastX || this.isTouched) {
         return;
       }
-
       this.isTouched = true;
 
       // 一番最後のスライドかつ、スライド量が50px以下の場合、スライドさせない
@@ -88,7 +87,13 @@ export default class CarouselUI {
         return;
       }
 
-      // 一番最初のスライドかつ、スライド量が50px以下の場合、スライドさせない
+      // 次にスライドしようとした時、スライド量が50px以下の場合、スライドさせない
+      if (0 < this.firstX - this.lastX && this.firstX - this.lastX < 50) {
+        this.slideCarousel();
+        return;
+      }
+
+      // 前にスライドしようとした時、スライド量が50px以下の場合、スライドさせない
       if (0 < this.lastX - this.firstX && this.lastX - this.firstX < 50) {
         this.isFirstSlide = false;
         this.slideCarousel();
