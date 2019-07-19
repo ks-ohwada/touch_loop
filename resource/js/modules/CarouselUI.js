@@ -42,6 +42,19 @@ export default class CarouselUI {
     this.$carouselInner.addEventListener('touchstart', e => {
       e.preventDefault();
       this.firstX = e.changedTouches[0].pageX;
+
+      if (this.isTouched) {
+        velocity(this.$carouselInner, 'stop');
+        this.translateX = parseFloat(
+          this.$carouselInner.style.transform
+            .replace('translateX(', '')
+            .replace('px)', '') || 0
+        );
+        console.log(this.translateX);
+        this.translateX = -this.translateX;
+
+        this.isTouched = false;
+      }
     });
 
     // タッチ中
@@ -89,12 +102,14 @@ export default class CarouselUI {
 
       // 次にスライドしようとした時、スライド量が50px以下の場合、スライドさせない
       if (0 < this.firstX - this.lastX && this.firstX - this.lastX < 50) {
+        this.translateX = this.width * this.index;
         this.slideCarousel();
         return;
       }
 
       // 前にスライドしようとした時、スライド量が50px以下の場合、スライドさせない
       if (0 < this.lastX - this.firstX && this.lastX - this.firstX < 50) {
+        this.translateX = this.width * this.index;
         this.isFirstSlide = false;
         this.slideCarousel();
         return;
@@ -121,13 +136,15 @@ export default class CarouselUI {
       // 右方向にタッチで動かした場合、右にスライドさせる。
       if (this.lastX < this.firstX) {
         this.index++;
-        this.translateX += this.width;
+        this.translateX = this.width * this.index;
+        // this.translateX += this.width;
+        console.log(this.translateX);
       }
 
       // 左方向にタッチで動かした場合、左にスライドさせる。
       if (this.lastX > this.firstX) {
         this.index--;
-        this.translateX -= this.width;
+        this.translateX = this.width * this.index;
       }
 
       this.slideCarousel();
