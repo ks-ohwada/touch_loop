@@ -50,7 +50,6 @@ export default class CarouselUI {
             .replace('translateX(', '')
             .replace('px)', '') || 0
         );
-        console.log(this.translateX);
         this.translateX = -this.translateX;
 
         this.isTouched = false;
@@ -61,9 +60,9 @@ export default class CarouselUI {
     this.$carouselInner.addEventListener('touchmove', e => {
       this.diffX = e.changedTouches[0].pageX;
 
-      if (this.firstX === this.lastX || this.isTouched) {
-        return;
-      }
+      // if (this.firstX === this.lastX || this.isTouched) {
+      //   return;
+      // }
 
       this.width * (this.$carouselItems.length - 1) <
       this.translateX + this.firstX - this.diffX
@@ -82,8 +81,16 @@ export default class CarouselUI {
       e.preventDefault();
       this.lastX = e.changedTouches[0].pageX;
 
-      // スライド中はクリックイベントを発火しない
-      if (this.firstX === this.lastX || this.isTouched) {
+      // タッチした時の不具合をここで直したい
+      if (this.firstX === this.lastX) {
+        this.translateX = this.width * this.index;
+        this.lastTranslateX = parseFloat(
+          this.$carouselInner.style.transform
+            .replace('translateX(', '')
+            .replace('px)', '') || 0
+        );
+        this.lastTranslateX = -this.lastTranslateX;
+        this.slideCarousel();
         return;
       }
       this.isTouched = true;
@@ -137,8 +144,6 @@ export default class CarouselUI {
       if (this.lastX < this.firstX) {
         this.index++;
         this.translateX = this.width * this.index;
-        // this.translateX += this.width;
-        console.log(this.translateX);
       }
 
       // 左方向にタッチで動かした場合、左にスライドさせる。
