@@ -81,7 +81,6 @@ export default class CarouselUI {
       e.preventDefault();
       this.lastX = e.changedTouches[0].pageX;
 
-      // タッチした時の不具合をここで直したい
       if (this.firstX === this.lastX) {
         this.translateX = this.width * this.index;
         this.lastTranslateX = parseFloat(
@@ -192,6 +191,7 @@ export default class CarouselUI {
   // カルーセルをスライドさせる
   slideCarousel() {
     if (this.isUndo) {
+      velocity(this.$carouselInner, 'stop');
       velocity(
         this.$carouselInner,
         {
@@ -199,7 +199,6 @@ export default class CarouselUI {
         },
         {
           duration: 500,
-          mobileHA: false,
           complete: () => {
             this.$carouselInner.style.transform = `translateX(-${this.width *
               (this.$carouselItems.length - 1)}px)`;
@@ -215,6 +214,7 @@ export default class CarouselUI {
     }
 
     if (this.isLastSlide) {
+      velocity(this.$carouselInner, 'stop');
       velocity(
         this.$carouselInner,
         {
@@ -222,7 +222,6 @@ export default class CarouselUI {
         },
         {
           duration: 500,
-          mobileHA: false,
           complete: () => {
             this.$carouselItems[
               this.$carouselItems.length - 1
@@ -235,6 +234,7 @@ export default class CarouselUI {
     }
 
     if (this.isFirstSlide) {
+      velocity(this.$carouselInner, 'stop');
       velocity(
         this.$carouselInner,
         {
@@ -242,7 +242,6 @@ export default class CarouselUI {
         },
         {
           duration: 500,
-          mobileHA: false,
           complete: () => {
             this.$carouselInner.style.transform = `translateX(-${this.width *
               (this.$carouselItems.length - 1)}px)`;
@@ -256,6 +255,7 @@ export default class CarouselUI {
       return;
     }
 
+    velocity(this.$carouselInner, 'stop');
     velocity(
       this.$carouselInner,
       {
@@ -263,7 +263,6 @@ export default class CarouselUI {
       },
       {
         duration: 500,
-        mobileHA: false,
         complete: () => {
           this.$carouselItems[
             this.$carouselItems.length - 1
@@ -281,6 +280,7 @@ export default class CarouselUI {
         this.$carouselItems.length - 1
       ].style.transform = `translateX(-${this.$carouselItems.length * 100}%)`;
       this.$carouselInner.style.transform = `translateX(${this.width -
+        this.lastTranslateX -
         (this.firstX - this.diffX)}px)`;
 
       this.lastTranslateX = this.width - (this.firstX - this.diffX);
