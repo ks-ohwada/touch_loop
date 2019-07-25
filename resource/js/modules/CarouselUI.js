@@ -24,6 +24,7 @@ export default class CarouselUI {
     this.isFirstSlide = false;
     this.isUndo = false;
     this.isTouched = false;
+    this.isSlideIntermediate = false;
 
     // 初期化
     this.$carouselInner.style.width = `${this.$carouselItems.length * 100}%`;
@@ -52,6 +53,7 @@ export default class CarouselUI {
         );
         this.translateX = -this.translateX;
 
+        this.isSlideIntermediate = true;
         this.isTouched = false;
       }
     });
@@ -135,7 +137,7 @@ export default class CarouselUI {
         this.translateX = this.width * (this.$carouselItems.length - 1);
         this.index = this.$carouselItems.length - 1;
         this.slideCarousel();
-        this.isFirstSlide = false;
+        // this.isFirstSlide = false;
         return;
       }
 
@@ -249,6 +251,7 @@ export default class CarouselUI {
               this.$carouselItems.length - 1
             ].style.transform = ``;
             this.isTouched = false;
+            this.isFirstSlide = false;
           },
         }
       );
@@ -275,12 +278,22 @@ export default class CarouselUI {
 
   // カルーセルがループする時の処理
   loopCarousel() {
+    if (this.isLastSlide && this.isSlideIntermediate) {
+      this.$carouselItems[
+        this.$carouselItems.length - 1
+      ].style.transform = `translateX(-${this.$carouselItems.length * 100}%)`;
+      this.$carouselInner.style.transform = `translateX(${this.width +
+        this.diffX}px)`;
+
+      // this.lastTranslateX = this.width - (this.firstX - this.diffX);
+      return;
+    }
+
     if (this.isLastSlide) {
       this.$carouselItems[
         this.$carouselItems.length - 1
       ].style.transform = `translateX(-${this.$carouselItems.length * 100}%)`;
       this.$carouselInner.style.transform = `translateX(${this.width -
-        this.lastTranslateX -
         (this.firstX - this.diffX)}px)`;
 
       this.lastTranslateX = this.width - (this.firstX - this.diffX);
